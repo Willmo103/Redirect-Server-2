@@ -31,3 +31,7 @@ def internal_server_error():
         text="Error 500: Internal Server Error",
         img=url_for("static", filename="img/500.png"),
     )
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=9404)

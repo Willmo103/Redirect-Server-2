@@ -8,8 +8,6 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-EXPOSE 4404
+EXPOSE 9404
 
-ENV FLASK_APP=app
-
-CMD ["Python", "run.py"]
+CMD ["flask", "run", "--host=0.0.0.0","--port=9404"]
