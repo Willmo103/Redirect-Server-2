@@ -1,6 +1,6 @@
 FROM python:3.9.5
 
-WORKDIR /app
+WORKDIR /src
 
 COPY requirements.txt requirements.txt
 
@@ -12,4 +12,4 @@ EXPOSE 4404
 
 ENV FLASK_APP=app
 
-CMD ["flask", "run", "--host=0.0.0.0", "--port=4404"]
+CMD ["Python", "run.py"]
