@@ -8,7 +8,7 @@ def down_for_maintenance():
     return render_template(
         "template.jinja",
         title="Server Down",
-        text="Server Down for Maintenance",
+        text="Server Down for Maintenance. Please check back later or contact the administrator.",
         img=url_for("static", filename="img/Maint.png"),
     )
 
