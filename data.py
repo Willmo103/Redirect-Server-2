@@ -24,9 +24,6 @@ class DataManager:
             self._save_data()
 
     def serialize(self):
-        for key, value in self.__dict__.items():
-            if isinstance(value, datetime):
-                self.__dict__[key] = value.strftime("%Y-%m-%d %H:%M:%S")
         return self.__dict__
 
     def _load_data(self):
@@ -35,9 +32,8 @@ class DataManager:
 
     def _save_data(self):
         self.date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        data = self.serialize()
         with open(self.JSON_PATH, "w") as f:
-            json.dump(data, f, indent=4)
+            json.dump(self.serialize(), f, indent=4)
 
     def _update_data(self, key, value):
         setattr(self, key, value)
@@ -54,7 +50,6 @@ class DataManager:
     @classmethod
     def from_file(cls):
         if not os.path.exists(cls.JSON_PATH):
-            # Initialize file with default values if it doesn't exist
             instance = cls()
             instance._save_data()
         else:
@@ -66,3 +61,5 @@ class DataManager:
     def update_fields(self, **kwargs):
         for key, value in kwargs.items():
             self._update_data(key, value)
+
+

@@ -9,12 +9,6 @@ app.secret_key = os.urandom(24)  # Generate a random secret key for the session
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 data = DataManager.from_file() if os.path.exists(DataManager.JSON_PATH) else DataManager()
 
-# Set the config for API responses
-app.config["JSON_SORT_KEYS"] = False
-app.config["JSONIFY_PRETTYPRINT_REGULAR"] = True
-
-# Assuming MODIFY_SECRET_KEY is a plaintext password for simplicity.
-# In a real application, it should be hashed and checked securely.
 modify_secret_key_hash = generate_password_hash(os.environ.get('MODIFY_SECRET_KEY'))
 
 @app.route("/login", methods=["GET", "POST"])
@@ -28,11 +22,22 @@ def login():
             return "Invalid password", 403
     return render_template("login.jinja.html")
 
-@app.route("/admin", methods=["GET"])
-def admin_page():
+
+@app.route("/admin", methods=["GET", "POST"])
+def admin():
     if not session.get('logged_in'):
         return redirect("/login")
-    return render_template("admin.jinja.html", title="Admin Page", data=data.serialize())
+
+    if request.method == "POST":
+        updated_data = {}
+        for key, value in request.form.items():
+            if value:
+                updated_data[key] = value
+        data.update_fields(**updated_data)
+        return redirect("/admin")
+
+    return render_template("admin.jinja.html", title="Data Manager", data=data.serialize())
+
 
 
 @app.route("/maint", methods=["GET"])
@@ -76,24 +81,5 @@ def message_and_redirect():
     )
 
 
-@app.route("/api/v1/data", methods=["GET"])
-def api_message():
-    return jsonify(data.serialize())
-
-
-@app.route("/api/v1/data", methods=["POST"])
-def api_update():
-    if not session.get('logged_in'):
-        return jsonify({"error": "Authentication required"}), 403
-    data.update_fields(**request.form)
-    return redirect("/admin")
-
-
-@app.route("/api/v1/data_schema", methods=["GET"])
-def api_schema():
-    schema = [key for key in data.serialize().keys()]
-    return jsonify(schema)
-
-
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=9404)
+    app.run(host="0.0.0.0", port=9404, debug=True)
