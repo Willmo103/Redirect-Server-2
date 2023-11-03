@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for
+from flask import Flask, render_template, request, url_for, redirect, jsonify
 from data import DataManager
 
 app = Flask(__name__)
@@ -43,6 +43,25 @@ def message_and_redirect():
         text=data.get_message(),
         date=data.get_date(),
     )
+
+
+@app.route("/api/v1/data", methods=["GET"])
+def api_message():
+    return jsonify(data.serialize())
+
+
+@app.route("/api/v1/data", methods=["POST"])
+def api_update():
+    if request.headers.get("X-Modify-Key") != data.MODIFY_SECRET_KEY:
+        return jsonify({"error": "Invalid key"}), 403
+    data.update_message(request.json.get("message"))
+    return jsonify(data.serialize())
+
+
+@app.route("/api/v1/data_schema", methods=["GET"])
+def api_schema():
+    schema = [key for key in data.serialize().keys()]
+    return jsonify(schema)
 
 
 if __name__ == "__main__":
