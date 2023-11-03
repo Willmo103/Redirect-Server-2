@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.7/tailwind.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="dark:bg-gray-900">
+    <nav class="bg-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <a href="#" class="font-bold text-white">{{ title }}</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
+        <form action="/api/v1/data" method="post" id="updateForm" class="space-y-6">
+            <h1 class="text-4xl text-center text-gray-900 dark:text-white">
+                Update Data Fields
+            </h1>
+            {% for key, value in data.items() %}
+            {% if key != 'date' %}
+            <div>
+                <label for="{{ key }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{
+                    key|capitalize }}</label>
+                <input type="text" name="{{ key }}" id="{{ key }}" value="{{ value }}"
+                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            </div>
+            {% endif %}
+            {% endfor %}
+            <div>
+                <button type="submit"
+                    class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Update</button>
+            </div>
+        </form>
+    </div>
+</body>
+
+</html>

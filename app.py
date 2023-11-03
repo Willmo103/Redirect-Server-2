@@ -1,8 +1,38 @@
-from flask import Flask, render_template, request, url_for, redirect, jsonify
+from flask import Flask, render_template, request, url_for, redirect, jsonify, session
+from flask_cors import CORS
 from data import DataManager
+from werkzeug.security import check_password_hash, generate_password_hash
+import os
 
 app = Flask(__name__)
-data = DataManager.load_from_file()
+app.secret_key = os.urandom(24)  # Generate a random secret key for the session
+CORS(app, resources={r"/api/*": {"origins": "*"}})
+data = DataManager.from_file() if os.path.exists(DataManager.JSON_PATH) else DataManager()
+
+# Set the config for API responses
+app.config["JSON_SORT_KEYS"] = False
+app.config["JSONIFY_PRETTYPRINT_REGULAR"] = True
+
+# Assuming MODIFY_SECRET_KEY is a plaintext password for simplicity.
+# In a real application, it should be hashed and checked securely.
+modify_secret_key_hash = generate_password_hash(os.environ.get('MODIFY_SECRET_KEY'))
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        password = request.form["password"]
+        if check_password_hash(modify_secret_key_hash, password):
+            session['logged_in'] = True
+            return redirect("/admin")
+        else:
+            return "Invalid password", 403
+    return render_template("login.jinja.html")
+
+@app.route("/admin", methods=["GET"])
+def admin_page():
+    if not session.get('logged_in'):
+        return redirect("/login")
+    return render_template("admin.jinja.html", title="Admin Page", data=data.serialize())
 
 
 @app.route("/maint", methods=["GET"])
@@ -40,8 +70,9 @@ def message_and_redirect():
     return render_template(
         "message_forward.jinja.html",
         title="README",
-        text=data.get_message(),
-        date=data.get_date(),
+        text=data.message,
+        date=data.date,
+        redirect=data.redirect,
     )
 
 
@@ -52,10 +83,10 @@ def api_message():
 
 @app.route("/api/v1/data", methods=["POST"])
 def api_update():
-    if request.headers.get("X-Modify-Key") != data.MODIFY_SECRET_KEY:
-        return jsonify({"error": "Invalid key"}), 403
-    data.update_message(request.json.get("message"))
-    return jsonify(data.serialize())
+    if not session.get('logged_in'):
+        return jsonify({"error": "Authentication required"}), 403
+    data.update_fields(**request.form)
+    return redirect("/admin")
 
 
 @app.route("/api/v1/data_schema", methods=["GET"])

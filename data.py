@@ -1,9 +1,10 @@
 import os
 import json
 from datetime import datetime
-
+import dotenv
 
 class DataManager:
+    dotenv.load_dotenv('.env')
     JSON_PATH = os.path.join(os.path.dirname(__file__), "data.json")
     MODIFY_SECRET_KEY = os.environ.get("MODIFY_SECRET_KEY")
 
@@ -17,6 +18,10 @@ class DataManager:
         self.redirect = redirect
         for key, value in kwargs.items():
             setattr(self, key, value)
+        if not self.date:
+            self.date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        if not os.path.exists(self.JSON_PATH):
+            self._save_data()
 
     def serialize(self):
         for key, value in self.__dict__.items():
@@ -30,7 +35,7 @@ class DataManager:
 
     def _save_data(self):
         self.date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        data = self._serialize()
+        data = self.serialize()
         with open(self.JSON_PATH, "w") as f:
             json.dump(data, f, indent=4)
 
