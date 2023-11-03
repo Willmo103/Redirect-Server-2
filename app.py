@@ -32,6 +32,14 @@ def internal_server_error():
         img=url_for("static", filename="img/500.png"),
     )
 
+@app.route("/message", methods=["GET"])
+def message_and_redirect():
+    return render_template(
+        "template.jinja",
+        title=get_title(),
+        text=get_message,
+        img=url_for("static", filename="img/500.png"),
+    )
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=9404)
