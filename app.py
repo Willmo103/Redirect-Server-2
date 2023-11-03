@@ -11,6 +11,10 @@ data = DataManager.from_file() if os.path.exists(DataManager.JSON_PATH) else Dat
 
 modify_secret_key_hash = generate_password_hash(os.environ.get('MODIFY_SECRET_KEY'))
 
+@app.route("/", methods=["GET"])
+def index():
+    return redirect("/message")
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
